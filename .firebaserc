@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "itslawrey-flutter-demos"
+  },
+  "targets": {
+    "itslawrey-flutter-demos": {
+      "hosting": {
+        "binance_tracker": [
+          "itslawrey-binance-tracker"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
