@@ -1,16 +1,8 @@
 {
   "hosting": {
+    "target": "binance",
     "public": "build/web",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{"source": "**", "destination": "/index.html"}]
   }
 }
