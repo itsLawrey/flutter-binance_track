@@ -64,5 +64,10 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/Binance_Logo.png"  
-  min_sdk_android: 21 
+  image_path: "assets/Binance_Logo.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/Binance_Logo.png"
+    background_color: "#1E2329"
+    theme_color: "#FCD535"

@@ -31,8 +31,92 @@
 
   <title>binance_checker</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      background-color: #1E2329; /* Match app background */
+      margin: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #1E2329;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #2B3139;
+      border-top: 4px solid #FCD535; /* Binance Yellow */
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
+  <div id="loading" class="loading-container">
+    <div class="spinner"></div>
+  </div>
+  <script>
+    // Remove the loading indicator once the Flutter app is ready
+    // We observe the body for changes, as Flutter adds its view there
+    const loader = document.querySelector('#loading');
+    
+    // Fallback: If Flutter interop removes it or if we want to query specifically
+    // But MutationObserver is generic.
+    const observer = new MutationObserver(function(mutations) {
+      // Check if flutter-view or similar is added
+      // Or simply if body has more children now.
+      // Usually Flutter injects a <flutter-view> or similar.
+      // Let's just defer slightly to ensure first paint.
+      
+      // Simpler heuristic: When we see significant DOM addition.
+      for (let mutation of mutations) {
+        for (let node of mutation.addedNodes) {
+           // Flutter web often adds specific tags or iframes or just canvas
+           // In canvas kit it adds <flt-glass-pane>
+           if (node.tagName === 'FLT-GLASS-PANE' || node.tagName === 'FLUTTER-VIEW') {
+             // App loaded
+             loader.style.opacity = '0';
+             setTimeout(() => loader.remove(), 500);
+             observer.disconnect();
+             return;
+           }
+        }
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+    
+    // Also dispatch a custom event from Dart if we were doing that, but we are not.
+    // As a fail-safe, we can also check for the window._flutter being fully active?
+    // No, DOM observation is best for visual readiness.
+    
+    // Extended fail-safe: Check periodically if the specific flutter element exists
+    // just in case MutationObserver missed the root due to shadow dom etc.
+    const interval = setInterval(() => {
+       if (document.querySelector('flt-glass-pane') || document.querySelector('flutter-view')) {
+          loader.style.opacity = '0';
+          setTimeout(() => loader.remove(), 500);
+          observer.disconnect();
+          clearInterval(interval);
+       }
+    }, 200);
+  
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

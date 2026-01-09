@@ -43,3 +43,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase configuration (contains project IDs)
+lib/firebase_options.dart
+
+# Environment variables
+.env
+*.env
+
+# Secrets & API Keys
+secrets.json
