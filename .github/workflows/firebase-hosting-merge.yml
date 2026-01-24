@@ -24,14 +24,14 @@ jobs:
       - name: 🛠️ Build Web App
         run: flutter build web --release
 
-      - name: � Install Functions Dependencies
+      - name: Install Functions Dependencies
         working-directory: functions
         run: npm ci
 
-      - name: �🚀 Deploy to Firebase (Hosting + Functions)
+      - name: 🚀 Deploy to Firebase (Hosting + Functions)
         uses: w9jds/firebase-action@master
         with:
-          args: deploy --only hosting:binance,functions
+          args: deploy --only hosting:binance,functions --force
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ITSLAWREY_FLUTTER_DEMOS }}
           PROJECT_ID: itslawrey-flutter-demos
