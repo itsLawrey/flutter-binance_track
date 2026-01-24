@@ -3,12 +3,11 @@ import 'package:flutter/foundation.dart';
 /// Application-wide constants and configuration
 class AppConstants {
   // Binance API Configuration
-  /// Uses CORS proxy when deployed to web (Firebase) to bypass CORS restrictions
+  /// Uses Firebase Cloud Functions proxy for web production builds
   /// Direct URL for local development and mobile platforms
   static String get binanceApiBaseUrl {
-    // Use CORS proxy only in web release mode (production on Firebase)
     if (kIsWeb && kReleaseMode) {
-      return 'https://corsproxy.io/?https://api.binance.com';
+      return 'https://us-central1-itslawrey-flutter-demos.cloudfunctions.net/binanceProxy';
     }
     return 'https://api.binance.com';
   }
@@ -83,11 +82,10 @@ class AppConstants {
   };
 
   /// European Central Bank exchange rates API
-  /// Uses CORS proxy when deployed to web (Firebase) to bypass CORS restrictions
+  /// Uses Firebase Cloud Functions proxy for web production builds
   static String get ecbApiUrl {
-    // Use CORS proxy only in web release mode (production on Firebase)
     if (kIsWeb && kReleaseMode) {
-      return 'https://corsproxy.io/?https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
+      return 'https://us-central1-itslawrey-flutter-demos.cloudfunctions.net/ecbProxy';
     }
     return 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
   }

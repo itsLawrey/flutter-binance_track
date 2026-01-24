@@ -24,11 +24,19 @@ jobs:
       - name: 🛠️ Build Web App
         run: flutter build web --release
 
-      - name: 🚀 Deploy to Firebase
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: 🟢 Setup Node.js (for Cloud Functions)
+        uses: actions/setup-node@v4
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ITSLAWREY_FLUTTER_DEMOS }}
-          channelId: live
-          projectId: itslawrey-flutter-demos
-          target: binance
+          node-version: '20'
+
+      - name: 📦 Install Functions dependencies
+        run: |
+          cd functions
+          npm ci
+
+      - name: 🚀 Deploy to Firebase (Hosting + Functions)
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ITSLAWREY_FLUTTER_DEMOS }}
+        run: |
+          npm install -g firebase-tools
+          firebase deploy --only hosting:binance,functions --project itslawrey-flutter-demos --token "$FIREBASE_TOKEN"
