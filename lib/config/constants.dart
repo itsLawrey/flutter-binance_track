@@ -7,7 +7,7 @@ class AppConstants {
   /// Direct URL for local development and mobile platforms
   static String get binanceApiBaseUrl {
     if (kIsWeb && kReleaseMode) {
-      return 'https://us-central1-itslawrey-flutter-demos.cloudfunctions.net/binanceProxy';
+      return 'https://binanceproxy-rvomzjulia-ew.a.run.app';
     }
     return 'https://api.binance.com';
   }
@@ -85,7 +85,7 @@ class AppConstants {
   /// Uses Firebase Cloud Functions proxy for web production builds
   static String get ecbApiUrl {
     if (kIsWeb && kReleaseMode) {
-      return 'https://us-central1-itslawrey-flutter-demos.cloudfunctions.net/ecbProxy';
+      return 'https://ecbproxy-rvomzjulia-ew.a.run.app';
     }
     return 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
   }

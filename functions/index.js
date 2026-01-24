@@ -6,57 +6,77 @@
  */
 
 const {onRequest} = require("firebase-functions/v2/https");
-const cors = require("cors")({origin: true});
+const cors = require("cors")({
+  origin: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-MBX-APIKEY"],
+  credentials: true,
+});
 const fetch = require("node-fetch");
 
 /**
  * Proxy for Binance API
  * Forwards all requests to api.binance.com preserving headers and query params
  */
-exports.binanceProxy = onRequest({maxInstances: 10}, (req, res) => {
-  return cors(req, res, async () => {
-    try {
-      // Get the path after /binanceProxy/
-      const binancePath = req.url.substring(1); // Remove leading /
-      const binanceUrl = `https://api.binance.com/${binancePath}`;
+exports.binanceProxy = onRequest(
+    {region: "europe-west1", maxInstances: 10},
+    (req, res) => {
+      // Log headers for debugging
+      console.log("Request Headers:", JSON.stringify(req.headers));
+      console.log("Request Method:", req.method);
+      console.log("Request URL:", req.url);
 
-      // Forward important headers (especially for signed requests)
-      const headers = {};
-      if (req.headers["x-mbx-apikey"]) {
-        headers["X-MBX-APIKEY"] = req.headers["x-mbx-apikey"];
-      }
+      return cors(req, res, async () => {
+        try {
+          // Get the path after /binanceProxy/
+          const binancePath = req.url.substring(1); // Remove leading /
+          const binanceUrl = `https://api.binance.com/${binancePath}`;
 
-      // Make the proxied request
-      const response = await fetch(binanceUrl, {
-        method: req.method,
-        headers: headers,
+          // Forward important headers (especially for signed requests)
+          const headers = {};
+          if (req.headers["x-mbx-apikey"]) {
+            headers["X-MBX-APIKEY"] = req.headers["x-mbx-apikey"];
+          }
+
+          // Make the proxied request
+          const response = await fetch(binanceUrl, {
+            method: req.method,
+            headers: headers,
+          });
+
+          const data = await response.text();
+
+          // Forward Content-Type if present
+          if (response.headers.get("content-type")) {
+            res.set("Content-Type", response.headers.get("content-type"));
+          }
+
+          res.status(response.status).send(data);
+        } catch (error) {
+          console.error("Binance Proxy Error:", error);
+          res.status(500).json({error: error.message});
+        }
       });
-
-      const data = await response.text();
-      res.status(response.status).send(data);
-    } catch (error) {
-      console.error("Binance Proxy Error:", error);
-      res.status(500).json({error: error.message});
-    }
-  });
-});
+    });
 
 /**
  * Proxy for European Central Bank Exchange Rates
  * Fetches daily exchange rates XML
  */
-exports.ecbProxy = onRequest({maxInstances: 5}, (req, res) => {
-  return cors(req, res, async () => {
-    try {
-      const response = await fetch(
-          "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml",
-      );
+exports.ecbProxy = onRequest(
+    {region: "europe-west1", maxInstances: 5},
+    (req, res) => {
+      return cors(req, res, async () => {
+        try {
+          const response = await fetch(
+              "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml",
+          );
 
-      const data = await response.text();
-      res.status(200).set("Content-Type", "application/xml").send(data);
-    } catch (error) {
-      console.error("ECB Proxy Error:", error);
-      res.status(500).json({error: error.message});
-    }
-  });
-});
+          const data = await response.text();
+          res.status(200).set("Content-Type", "application/xml").send(data);
+        } catch (error) {
+          console.error("ECB Proxy Error:", error);
+          res.status(500).json({error: error.message});
+        }
+      });
+    });
