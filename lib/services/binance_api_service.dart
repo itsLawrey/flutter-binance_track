@@ -82,7 +82,7 @@ class BinanceApiService {
 
     // 1. Get Account Info
     final accountData = await _privateGet('/api/v3/account');
-    Map<String, dynamic> assetsToCheck = {};
+    Map<String, double> assetsToCheck = {};
 
     for (var balance in accountData['balances']) {
       double free = double.parse(balance['free']);
@@ -101,9 +101,13 @@ class BinanceApiService {
     // 2. Process each asset
     for (String assetName in assetsToCheck.keys) {
       double actualBalance = assetsToCheck[assetName]!;
-      bool foundValidPair = false;
 
-      // Try each quote asset until we find one with trades
+      // Temporary storage for pairs found for this asset
+      // Map key: symbol (e.g. BTCUSDT), value: Struct with stats
+      Map<String, _PairStats> pairStats = {};
+      double totalNetQtyBoughtAllPairs = 0.0;
+
+      // Try each quote asset to find ALL valid pairs
       for (String quoteAsset in assetsToTry) {
         String symbol = assetName + quoteAsset;
         onStatusUpdate("Processing $symbol...");
@@ -117,7 +121,8 @@ class BinanceApiService {
           if (trades.isEmpty) continue;
 
           double totalCostBasis = 0.0;
-          double totalQtyBought = 0.0;
+          double totalQtyBought =
+              0.0; // This is actually "net quantity remaining from trades"
 
           // Calculate cost basis across ALL trades (buys and sells)
           for (var trade in trades) {
@@ -147,50 +152,60 @@ class BinanceApiService {
             }
           }
 
-          // Use actual balance from account, not calculated from trades
-          // This handles deposits/withdrawals correctly
-          if (actualBalance <= 0 || totalQtyBought <= 0) {
-            foundValidPair = true; // Found trades but nothing to show
-            break;
-          }
-
-          // Calculate average buy price from remaining cost basis
-          double avgBuyPrice = totalCostBasis / actualBalance;
+          if (totalQtyBought <= 0) continue;
 
           // Fetch current price
           double? currentPrice = await _getCurrentPrice(symbol);
           if (currentPrice == null) continue;
 
-          // Calculate final stats using actual balance
-          double currentValue = actualBalance * currentPrice;
-          double unrealizedPnl = currentValue - totalCostBasis;
-          double pnlPercent = (unrealizedPnl / totalCostBasis) * 100;
-
-          results.add(
-            AssetResult(
-              symbol: symbol,
-              quantityHeld: actualBalance,
-              avgBuyPrice: avgBuyPrice,
-              currentPrice: currentPrice,
-              totalCost: totalCostBasis,
-              currentValue: currentValue,
-              unrealizedPnl: unrealizedPnl,
-              unrealizedPnlPercent: pnlPercent,
-            ),
+          // Store stats for this pair
+          pairStats[symbol] = _PairStats(
+            netQtyBought: totalQtyBought,
+            avgPrice: totalCostBasis / totalQtyBought,
+            currentPrice: currentPrice,
           );
 
-          foundValidPair = true;
-          break; // Found valid pair, no need to try other quotes
+          totalNetQtyBoughtAllPairs += totalQtyBought;
         } catch (e) {
           // Try next quote asset
           continue;
         }
       }
 
-      // If no valid pair found for this asset, track it
-      if (!foundValidPair) {
+      // If no valid pairs found
+      if (pairStats.isEmpty) {
         skippedAssets.add(assetName);
+        continue;
       }
+
+      // 3. Apportion actual balance to pairs and create results
+      pairStats.forEach((symbol, stats) {
+        // Calculate portion of the actual wallet balance this pair represents
+        double allocationRatio = stats.netQtyBought / totalNetQtyBoughtAllPairs;
+        double quantityHeld = actualBalance * allocationRatio;
+
+        // Calculate final values based on the allocated quantity
+        double totalCostForAllocatedQty = quantityHeld * stats.avgPrice;
+        double currentValue = quantityHeld * stats.currentPrice;
+        double unrealizedPnl = currentValue - totalCostForAllocatedQty;
+        // Avoid division by zero
+        double pnlPercent = totalCostForAllocatedQty > 0
+            ? (unrealizedPnl / totalCostForAllocatedQty) * 100
+            : 0.0;
+
+        results.add(
+          AssetResult(
+            symbol: symbol,
+            quantityHeld: quantityHeld,
+            avgBuyPrice: stats.avgPrice,
+            currentPrice: stats.currentPrice,
+            totalCost: totalCostForAllocatedQty,
+            currentValue: currentValue,
+            unrealizedPnl: unrealizedPnl,
+            unrealizedPnlPercent: pnlPercent,
+          ),
+        );
+      });
 
       // Rate limit pause
       await Future.delayed(
@@ -200,4 +215,17 @@ class BinanceApiService {
 
     return {'results': results, 'skippedAssets': skippedAssets};
   }
+}
+
+/// Helper class to store temporary statistics for a trading pair
+class _PairStats {
+  final double netQtyBought;
+  final double avgPrice;
+  final double currentPrice;
+
+  _PairStats({
+    required this.netQtyBought,
+    required this.avgPrice,
+    required this.currentPrice,
+  });
 }

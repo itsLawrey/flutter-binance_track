@@ -367,150 +367,174 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
     return Drawer(
       child: Container(
         color: AppTheme.sharkBlack,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 50),
-            const Text(
-              "Configuration",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.brightSunYellow,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text("API Key", style: TextStyle(color: Colors.white70)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _apiKeyController,
-              decoration: const InputDecoration(
-                hintText: "Enter Binance API Key",
-                hintStyle: TextStyle(color: Colors.white24),
-              ),
-              style: const TextStyle(color: Colors.white),
-            ),
-            const SizedBox(height: 20),
-            const Text("Secret Key", style: TextStyle(color: Colors.white70)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _apiSecretController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                hintText: "Enter Binance Secret Key",
-                hintStyle: TextStyle(color: Colors.white24),
-              ),
-              style: const TextStyle(color: Colors.white),
-            ),
-            const SizedBox(height: 30),
-            const Divider(color: Colors.white24),
-            const SizedBox(height: 20),
-            const Text(
-              "Display Currency",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.brightSunYellow,
-              ),
-            ),
-            const SizedBox(height: 20),
-            DropdownButton<String>(
-              value: _selectedCurrency,
-              dropdownColor: AppTheme.sharkBlack,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-              isExpanded: true,
-              underline: const SizedBox(), // Remove white border
-              items: AppConstants.supportedCurrencies.map((String currency) {
-                return DropdownMenuItem<String>(
-                  value: currency,
-                  child: Text(
-                    "$currency (${AppConstants.currencySymbols[currency]})",
-                  ),
-                );
-              }).toList(),
-              onChanged: (String? newCurrency) {
-                if (newCurrency != null) {
-                  _saveCurrency(newCurrency);
-                }
-              },
-            ),
-            const SizedBox(height: 30),
-            const Divider(color: Colors.white24),
-            const SizedBox(height: 20),
-            // Quote Assets Section
-            const Text(
-              "Quote Assets",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.brightSunYellow,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              "Select which currency pairs to scan (e.g., USDC, USDT)",
-              style: TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-            const SizedBox(height: 12),
-            // Tags display with Wrap
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ..._selectedQuoteAssets.map(
-                  (tag) => Chip(
-                    label: Text(tag),
-                    backgroundColor: AppTheme.brightSunYellow.withOpacity(0.2),
-                    labelStyle: const TextStyle(
-                      color: AppTheme.brightSunYellow,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    deleteIcon: const Icon(
-                      Icons.close,
-                      size: 18,
-                      color: AppTheme.brightSunYellow,
-                    ),
-                    onDeleted: () => _removeQuoteAsset(tag),
+                const SizedBox(height: 50),
+                const Text(
+                  "Configuration",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.brightSunYellow,
                   ),
                 ),
-                // Add tag button
-                ActionChip(
-                  label: const Icon(Icons.add, size: 18),
-                  backgroundColor: AppTheme.brightSunYellow.withOpacity(0.3),
-                  onPressed: _showAddTagDialog,
+                const SizedBox(height: 20),
+                const Text("API Key", style: TextStyle(color: Colors.white70)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _apiKeyController,
+                  decoration: const InputDecoration(
+                    hintText: "Enter Binance API Key",
+                    hintStyle: TextStyle(color: Colors.white24),
+                  ),
+                  style: const TextStyle(color: Colors.white),
                 ),
-              ],
-            ),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
+                const SizedBox(height: 20),
+                const Text(
+                  "Secret Key",
+                  style: TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _apiSecretController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    hintText: "Enter Binance Secret Key",
+                    hintStyle: TextStyle(color: Colors.white24),
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 30),
+                const Divider(color: Colors.white24),
+                const SizedBox(height: 20),
+                const Text(
+                  "Display Currency",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.brightSunYellow,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                DropdownButton<String>(
+                  value: _selectedCurrency,
+                  dropdownColor: AppTheme.sharkBlack,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  isExpanded: true,
+                  underline: const SizedBox(), // Remove white border
+                  items: AppConstants.supportedCurrencies.map((
+                    String currency,
+                  ) {
+                    return DropdownMenuItem<String>(
+                      value: currency,
+                      child: Text(
+                        "$currency (${AppConstants.currencySymbols[currency]})",
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (String? newCurrency) {
+                    if (newCurrency != null) {
+                      _saveCurrency(newCurrency);
+                    }
+                  },
+                ),
+                const SizedBox(height: 30),
+                const Divider(color: Colors.white24),
+                const SizedBox(height: 20),
+                // Quote Assets Section
+                const Text(
+                  "Quote Assets",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.brightSunYellow,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "Select which currency pairs to scan (e.g., USDC, USDT)",
+                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+                const SizedBox(height: 12),
+                // Tags display with Wrap
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    Icon(Icons.info_outline, color: Colors.grey[400], size: 16),
-                    Text(
-                      "Keys are stored only locally.",
-                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    ..._selectedQuoteAssets.map(
+                      (tag) => Chip(
+                        label: Text(tag),
+                        backgroundColor: AppTheme.brightSunYellow.withOpacity(
+                          0.2,
+                        ),
+                        labelStyle: const TextStyle(
+                          color: AppTheme.brightSunYellow,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        deleteIcon: const Icon(
+                          Icons.close,
+                          size: 18,
+                          color: AppTheme.brightSunYellow,
+                        ),
+                        onDeleted: () => _removeQuoteAsset(tag),
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "API key must have read access to your account.",
-                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    // Add tag button
+                    ActionChip(
+                      label: const Icon(Icons.add, size: 18),
+                      backgroundColor: AppTheme.brightSunYellow.withOpacity(
+                        0.3,
+                      ),
+                      onPressed: _showAddTagDialog,
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.grey[400],
+                          size: 16,
+                        ),
+                        Text(
+                          "Keys are stored only locally.",
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "API key must have read access to your account.",
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _saveKeys,
+                  child: const Text(
+                    "Save Settings",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saveKeys,
-              child: const Text(
-                "Save Settings",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
