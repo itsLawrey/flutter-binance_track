@@ -498,29 +498,34 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Column(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: Colors.grey[400],
-                          size: 16,
-                        ),
-                        Text(
-                          "Keys are stored only locally.",
-                          style: TextStyle(
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
                             color: Colors.grey[400],
-                            fontSize: 12,
+                            size: 16,
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "API key must have read access to your account.",
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 12,
+                          const SizedBox(height: 4),
+                          Text(
+                            "Keys are stored only locally.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            "API key must have read access to your account.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
