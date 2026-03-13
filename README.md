@@ -7,6 +7,11 @@
 ## Visuals
 
 
+https://github.com/user-attachments/assets/312b8b23-88d0-4ca2-8352-6d3e9ed18e7d
+
+<img width="75%" height="auto" alt="binance" src="https://github.com/user-attachments/assets/eef393c4-ab1a-463a-95a9-b3c51b762e1b" />
+
+
 ## Tech Stack
 
 * **Frontend:** Flutter / Dart 3.9+
